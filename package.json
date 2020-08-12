@@ -6,6 +6,8 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "antd": "^4.5.4",
+    "axios": "^0.19.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1"
@@ -14,7 +16,14 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "generate-client": "nswag swagger2tsclient /input:%npm_package_devConfig_genClient_input% /output:%npm_package_devConfig_genClient_output%"
+  },
+  "devConfig": {
+    "genClient": {
+      "input": "https://localhost:44314/swagger/v1/swagger.json",
+      "output": "src/api-client/client.ts"
+    }
   },
   "eslintConfig": {
     "extends": "react-app"
