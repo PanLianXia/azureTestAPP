@@ -201,17 +201,20 @@ export class BlobStroageClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    uploadBlobFile(a: any): Promise<void> {
-        let url_ = this.baseUrl + "/api/BlobStroage/upload-blob-file";
+    uploadBlobFile(container: string | null | undefined, formCollection: KeyValuePairOfStringAndStringValues[] | null | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/BlobStroage/upload-blob-file?";
+        if (container !== undefined && container !== null)
+            url_ += "container=" + encodeURIComponent("" + container) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(a);
+        const content_ = new FormData();
+        if (formCollection !== null && formCollection !== undefined)
+            content_.append("formCollection", formCollection.toString());
 
         let options_ = <RequestInit>{
             body: content_,
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
             }
         };
 
@@ -221,6 +224,36 @@ export class BlobStroageClient {
     }
 
     protected processUploadBlobFile(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
+
+    uploadBlobFile1(): Promise<void> {
+        let url_ = this.baseUrl + "/api/BlobStroage/upload-blob-file1";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "POST",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUploadBlobFile1(_response);
+        });
+    }
+
+    protected processUploadBlobFile1(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -331,6 +364,57 @@ export interface ISearchBlobResultModel {
     blobType?: string | undefined;
     contentType?: string | undefined;
     createOn?: Date | undefined;
+}
+
+export class KeyValuePairOfStringAndStringValues implements IKeyValuePairOfStringAndStringValues {
+    key!: string;
+    value!: string[];
+
+    constructor(data?: IKeyValuePairOfStringAndStringValues) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+        if (!data) {
+            this.value = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.key = _data["key"];
+            if (Array.isArray(_data["value"])) {
+                this.value = [] as any;
+                for (let item of _data["value"])
+                    this.value!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): KeyValuePairOfStringAndStringValues {
+        data = typeof data === 'object' ? data : {};
+        let result = new KeyValuePairOfStringAndStringValues();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["key"] = this.key;
+        if (Array.isArray(this.value)) {
+            data["value"] = [];
+            for (let item of this.value)
+                data["value"].push(item);
+        }
+        return data; 
+    }
+}
+
+export interface IKeyValuePairOfStringAndStringValues {
+    key: string;
+    value: string[];
 }
 
 export class WeatherForecast implements IWeatherForecast {
